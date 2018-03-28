@@ -28,9 +28,9 @@ export default class ConfirmationCodeInput extends Component {
     codeLength: 5,
     inputPosition: 'center',
     autoFocus: true,
-    size: 40,
+    size: 80,
     className: 'border-box',
-    cellBorderWidth: 1,
+    cellBorderWidth: 0,
     activeColor: 'rgba(255, 255, 255, 1)',
     inactiveColor: 'rgba(255, 255, 255, 0.2)',
     space: 8,
@@ -43,7 +43,8 @@ export default class ConfirmationCodeInput extends Component {
     
     this.state = {
       codeArr: new Array(this.props.codeLength).fill(''),
-      currentIndex: 0
+      currentIndex: 0,
+      isFill: new Array(this.props.codeLength).fill(false,0, 3)
     };
     
     this.codeInputRefs = [];
@@ -63,6 +64,7 @@ export default class ConfirmationCodeInput extends Component {
   clear() {
     this.setState({
       codeArr: new Array(this.props.codeLength).fill(''),
+      isFill: new Array(this.props.codeLength).fill(false,0, 3),
       currentIndex: 0
     });
     this._setFocus(0);
@@ -163,7 +165,7 @@ export default class ConfirmationCodeInput extends Component {
       case 'border-box':
         return _.merge(classStyle, {
           borderWidth: cellBorderWidth,
-          borderColor: (active ? activeColor : inactiveColor)
+          borderColor: (active ? inactiveColor : activeColor)
         });
       case 'border-circle':
         return _.merge(classStyle, {
@@ -196,7 +198,9 @@ export default class ConfirmationCodeInput extends Component {
   _onKeyPress(e) {
     if (e.nativeEvent.key === 'Backspace') {
       const { currentIndex } = this.state;
+      //this.state.isFill[currentIndex] = false
       const nextIndex = currentIndex > 0 ? currentIndex - 1 : 0;
+      this.state.isFill[nextIndex] = false
       this._setFocus(nextIndex);
     }
   }
@@ -205,7 +209,8 @@ export default class ConfirmationCodeInput extends Component {
     const { codeLength, onFulfill, compareWithCode, ignoreCase } = this.props;
     let newCodeArr = _.clone(this.state.codeArr);
     newCodeArr[index] = character;
-    
+    this.state.isFill[index] = true
+
     if (index == codeLength - 1) {
       const code = newCodeArr.join('');
       
@@ -243,7 +248,7 @@ export default class ConfirmationCodeInput extends Component {
     
     const initialCodeInputStyle = {
       width: size,
-      height: size
+      height: size * 0.8
     };
     
     let codeInputs = [];
@@ -257,7 +262,8 @@ export default class ConfirmationCodeInput extends Component {
             styles.codeInput, 
             initialCodeInputStyle, 
             this._getClassStyle(className, this.state.currentIndex == id),
-            codeInputStyle
+            codeInputStyle,
+            this.state.isFill[id] ? styles.fillStyle :  styles.emptyStyle
           ]}
           underlineColorAndroid="transparent"
           selectionColor={activeColor}
@@ -292,5 +298,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     textAlign: 'center',
     padding: 0
-  }
+  },
+  fillStyle: {
+    backgroundColor: '#F0F0F0',
+  },
+  emptyStyle: {
+    backgroundColor: '#7BE3E6',
+  },
 });
